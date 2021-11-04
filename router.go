@@ -43,7 +43,7 @@ func (receiver Router) handleDelegates(w http.ResponseWriter, r *http.Request) {
 	for path, handler := range receiver.delegates {
 		if strings.HasPrefix(r.URL.Path, path) {
 			foundPath = true
-			r.URL.Path = r.URL.Path[:len(path)]
+			r.URL.Path = r.URL.Path[len(path):]
 			handler.ServeHTTP(w, r)
 			break
 		}
@@ -65,7 +65,7 @@ func (receiver *Router) Register(handler http.Handler) {
 	receiver.defaultHandler = AlternativeHandler(handler)
 }
 
-func (receiver Router) RegisterPath(handler http.Handler, path string) error {
+func (receiver *Router) RegisterPath(handler http.Handler, path string) error {
 	if receiver.paths == nil {
 		receiver.paths = make(map[string]http.Handler)
 	}
@@ -81,10 +81,11 @@ func (receiver *Router) RegisterPathMethod(handler http.Handler, path string, me
 		method, ok := receiver.methods[m]
 		if !ok {
 			receiver.methods[m] = make(map[string]http.Handler)
-			method, ok := receiver.methods[m]
+			method1, ok := receiver.methods[m]
 			if !ok {
 				return fmt.Errorf("failed to register a handler for method %q, to path %q", method, path)
 			}
+			method = method1
 		}
 		method[path] = handler
 	}
